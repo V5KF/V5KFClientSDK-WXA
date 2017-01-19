@@ -1,0 +1,77 @@
+/* pages/chat/res/pos.wxss */
+.v5_flex {
+  display: flex
+}
+.v5_fix {
+    position: fixed;
+    z-index: 1000;
+}
+/*.fix.cover,
+.mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}*/
+.v5_center {
+  text-align: center;
+}
+.v5_abs {
+    position: absolute;
+    z-index: 100;
+}
+.v5_abs.v5_cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+/*.abs.top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.abs.bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.abs.left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+}*/
+/*.abs.right,
+.carousel-left.right,
+.carousel-right.right,
+.map-pnl {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+.abs.tl {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.abs.tr {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.abs.bl {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+.abs.br {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}*/

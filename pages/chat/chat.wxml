@@ -1,0 +1,56 @@
+<!--pages/chat/chat.wxml-->
+<import src="msgTpls.wxml"/>
+<import src="ToolTip/toolTip.wxml"/>
+<view class="v5_abs v5_cover v5_pnl_container">
+    <!-- ToolTip信息提示 -->
+    <template is="toolTip" data="{{toolTip}}"/>
+    <view class="v5_pnl_msgs"
+        bindtap="{{showFunc ? 'bindContentTap' : ''}}">
+        <scroll-view scroll-y="true"
+            scroll-top="0"
+            scroll-into-view="{{scrollBottom}}"
+            bindscrolltoupper="bindscrolltoupper"
+            style="height: {{scrollHeight}}px">
+            <block wx:if="{{hists && hists.length > 0}}" wx:for-items="{{hists}}" wx:key="id">
+                <template is="msgItem" data="{{item, hist:true, index:index, info:info}}"/>
+            </block>
+            <view wx:if="{{hists && hists.length > 0}}" class="v5_center v5_msg v5_tips" id="histStart">
+                历史消息
+            </view>
+            <block wx:for-items="{{messages}}" wx:key="id">
+                <template is="msgItem" data="{{item, index:index, info:info}}"/>
+            </block>
+            <view id="scrollBottom"></view>
+        </scroll-view>
+    </view>
+    <view class="v5_pnl_input">
+        <input id="text" 
+            value="{{input.value}}"
+            placeholder="在此输入..."
+            cursor-spacing="12"
+            bindinput="bindinput"
+            bindfocus="bindfocus"
+            bindblur="bindblur"
+            bindconfirm="bindconfirm"/>
+        <image class="v5_pnl_add" 
+            bindtap="bindAddTap"
+            mode="aspectFit" 
+            src="./img/add.png"></image>
+    </view>
+    <view wx:if="{{showFunc}}" class="v5_pnl_func">
+        <!--<view class="v5_func_cell">
+            <image mode="aspectFit" src="./img/hotques.png"></image>
+            <text>常见问题</text>
+        </view>-->
+        <view class="v5_func_cell"
+            bindtap="tapImageUpload">
+            <image mode="aspectFit" src="./img/pic.png"></image>
+            <text>图片</text>
+        </view>
+        <view class="v5_func_cell"
+            bindtap="tapSwitchHuman">
+            <image mode="aspectFit" src="./img/worker.png"></image>
+            <text>转人工</text>
+        </view>
+    </view>
+</view>

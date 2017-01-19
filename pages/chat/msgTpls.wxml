@@ -1,0 +1,103 @@
+<!-- 消息气泡模板 -->
+<template name="msgItem">
+    <view wx:if="{{index === 0 || item.showTime}}" class="v5_center v5_msg v5_time">
+        <text>{{item.time}}</text>
+    </view>
+    
+    <!--<view wx:if="{{item.type == 9}}"  id="{{item.id}}">
+        <template wx:if="{{item.json}}" is="articleMsg" data="{{articles:item.json, time:item.time}}"/>
+    </view>-->
+    <view wx:if="{{item.type === 89}}" id="{{item.id}}" class="v5_center">
+        <view class="v5_center v5_msg v5_tips" id="msgTip">
+            {{item.json.text}}
+        </view>
+    </view>
+    <block wx:else>
+        <!-- 右边消息气泡 -->
+        <view wx:if="{{item.dir === 1}}" id="{{item.id}}" class="v5_msg v5_guest v5_msg_right" worker="客户">
+            <image class="v5_msg_host" src="{{info.cstmPhoto || './img/cstm.png'}}"/>
+            <view class="v5_right_Triangle"></view>
+            <view class="{{item.type === 2 ? 'v5_msg_ball' : 'v5_msg_ball v5_text'}}">
+                <template is="bubbleContent" data="{{index:index, json:item.json, type:item.type}}" />
+            </view>
+        </view>
+        <!-- 左边人工消息气泡 -->
+        <view wx:elif="{{item.dir === 0}}" id="{{item.id}}" class="v5_msg v5_worker v5_msg_left" worker="Chyrain">
+            <image class="v5_msg_host" src="{{info.workerPhoto || './img/v5kf.png'}}"/>
+            <view class="v5_left_Triangle"></view>
+            <view class="{{item.type === 2 ? 'v5_msg_ball' : 'v5_msg_ball v5_text'}}">
+                <template is="bubbleContent" data="{{index:index, json:item.json, type:item.type}}" />
+            </view>
+        </view>
+        <!-- 左边机器人消息气泡 -->
+        <view wx:elif="{{item.dir === 2}}" id="{{item.id}}" class="v5_msg v5_robot v5_msg_left" worker="小五">
+            <image class="v5_msg_host" src="{{info.robotPhoto || './img/robot.png'}}"/>
+            <view class="v5_left_Triangle"></view>
+            <view class="{{item.type === 2 ? 'v5_msg_ball' : 'v5_msg_ball v5_text'}}">
+                <template is="bubbleContent" data="{{index:index, json:item.json, type:item.type}}" />
+            </view>
+        </view>
+    </block>
+</template>
+
+<!-- 气泡内容模板 -->
+<template name="bubbleContent">
+    <block wx:if="{{type === 1}}">
+        <!--<text>{{json.text}}</text>-->
+        <template is="WxEmojiView" data="{{json}}"/>
+    </block>
+    <block wx:elif="{{type === 2}}">
+        <image
+            id="{{index}}"
+            bindload="msgImageLoad"
+            style="width:{{json.imgW}}px;height:{{json.imgH}}px"
+            src="{{json.src}}"/>
+    </block>
+    <!--<block wx:elif="{{type === 3}}">
+        <map
+            latitude="{{json.lat}}"
+            longitude="{{json.lng}}"
+            scale="14"
+            markers="{{json.markers}}"
+            >
+        </map>
+    </block>-->
+    <block wx:elif="{{type === 6}}">
+        
+    </block>
+    <block wx:elif="{{type === 7 || type === 8}}">
+        
+    </block>
+    <block wx:else>
+        <text>{{'暂不支持该消息类型(' + type + ')'}}</text>
+    </block>
+</template>
+
+<!-- emoji混合文本模板 -->
+<template name="WxEmojiView">
+  <view wx:if="{{json.emojiArray && json.emojiArray.length > 1}}" >
+    <block wx:for="{{json.emojiArray}}" wx:key="">
+      <block wx:if="{{item.node == 'text'}}">{{item.text}}</block>
+      <block wx:elif="{{item.node == 'emoji'}}">
+        <image class="v5_emoji" src="https://www.v5kf.com/app/emoji/{{item.text}}.png" />
+      </block>
+    </block>
+  </view>
+  <view wx:else >
+    <text>{{json.text}}</text>
+  </view>
+</template>
+
+<!-- 图文消息模板 -->
+<template name="articleMsg">
+    <view wx:if="{{articles.length === 1}}" class="v5_center v5_article_container">
+        <view>{{articles[0].name}}</view>
+        <view>{{articles[0].desc}}</view>
+        <view>{{time}}</view>
+    </view>
+    <view wx:elif="{{articles.length > 1}}" class="v5_center v5_article_container">
+        <view>{{articles[0].title}}</view>
+        <view>{{articles[0].desc}}</view>
+        <view>{{time}}</view>
+    </view>
+</template>
