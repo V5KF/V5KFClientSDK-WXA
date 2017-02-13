@@ -15,7 +15,7 @@
                 <template is="msgItem" data="{{item, hist:true, index:index, info:info}}"/>
             </block>
             <view wx:if="{{hists && hists.length > 0}}" class="v5_center v5_msg v5_tips" id="histStart">
-                历史消息
+                以上为历史消息
             </view>
             <block wx:for-items="{{messages}}" wx:key="id">
                 <template is="msgItem" data="{{item, index:index, info:info}}"/>
@@ -27,7 +27,7 @@
         <input id="text" 
             value="{{input.value}}"
             placeholder="在此输入..."
-            cursor-spacing="12"
+            cursor-spacing="10"
             bindinput="bindinput"
             bindfocus="bindfocus"
             bindblur="bindblur"

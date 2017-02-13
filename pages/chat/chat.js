@@ -6,6 +6,8 @@ var socketOpen = false;
 var socketMsgQueue = []; //发送失败缓存
 var lastTime = 0; //记录消息时间间隔
 var finishFlag = false, offset = 0, wsInterval;
+//历史消息显示显示,历史消息索引数组
+var htNeed = 5, ht, loading = false, nomore = false, showNomore = false;
 var v5config = {
       auth: null,
       fake: false,
@@ -15,9 +17,9 @@ var v5config = {
       url: {
         ques: 'https://www.v5kf.com/public/api_dkf/get_hot_ques',
         site: 'https://www.v5kf.com/public/api_dkf/get_chat_siteinfo',
-        auth: 'http://chat.v5kf.com/public/webauth/v9',
-        upload: 'http://chat.v5kf.com/public/upload',
-        ws: 'ws://chat.v5kf.com/public/sitews'
+        auth: 'https://chat.v5kf.com/public/webauth/v9',
+        upload: 'https://chat.v5kf.com/public/upload',
+        ws: 'wss://chat.v5kf.com/public/sitews'
       },
       reconn: false,
       voice: true,
@@ -80,16 +82,15 @@ Page({
     status: 0
   },
   /**
-   * 初始话流程
+   * 初始化流程
    */
   initChat:function(){
-    console.log('【initChat】');//////
     wx.showNavigationBarLoading();
 
     //调用应用实例的方法获取全局数据
-    var aid = v5config.site.aid;
-    var info = aid && aid && common.cache('v5_' + aid + '_info');
-    var stamp = aid && common.cache('v5_' + v5config.site.id + '_stamp');
+    var aid = v5config.site.aid, cache = common.cache('v5_' + v5config.site.id);
+    var info = aid && cache && cache.info;
+    var stamp = aid && cache && cache.stamp || 0;
     if (info && (common.fStamp() - stamp)/1000 < 3600 * 72) {//读取3天内的缓存，3天以上重新获取
       this.updateSiteInfo(info);
       this.getAccountAuth();
@@ -104,23 +105,24 @@ Page({
     if (!conf) {
       return '';
     }
-    var oid = conf.oid, sid = conf.site;
+    var oid = conf.oid, sid = conf.site,
+    cache = common.cache('v5_' + sid) || {};
     if (!oid) {
-      oid = common.cache('v5_' + sid + '_oid');
+      oid = cache && cache.oid;
     } else {
-      common.cache('v5_' + sid + '_oid', (oid || ''));
+      cache.oid = oid || '';
     }
     if (!oid) { // 当前时间36进制 和 一个随机数的36进制
       oid = (new Date()).getTime().toString(36) + Math.round(Math.random() * 0xffffffff).toString(36);
-      common.cache('v5_' + sid + '_oid', (oid || ''));
+      cache.oid = oid || '';
     }
+    common.cache('v5_' + sid, cache);
   	return decodeURIComponent(oid);
   },
   /**
    * 获取站点信息
    */
   getSiteInfo:function(){
-    console.log('[getSiteInfo]');//////
     var that = this;
     wx.request({
       url: v5config.url.site, //仅为示例，并非真实的接口地址
@@ -148,20 +150,21 @@ Page({
    * 解析更新站点信息
    */
   updateSiteInfo: function(info) {
-    var sid = info.site_id, 
+    var sid = info.site_id, cache = common.cache('v5_' + sid) || {}, 
       aid = info.info && info.info.account_id || '',
       robot = info.robot;
     v5config.site = info.info;
     v5config.robot = robot;
     v5config.site.id = sid;
     aid && (v5config.site.aid = aid);
-    aid && common.cache('v5_' + sid + '_aid', aid);
-    aid && common.cache('v5_' + aid + '_info', info);
-    aid && common.cache('v5_' + sid + '_stamp', common.fStamp());
-    // this.data.info.robotPhoto = common.httpsURL(robot.logo);
-    // this.data.info.robotName = robot.name;
-    // this.data.info.cstmName = v5config.guest.nickname;
-    // this.data.info.cstmPhoto = common.httpsURL(v5config.guest.photo);
+    common.assign(cache, {
+      id: sid,
+      aid: aid,
+      info: info,
+      stamp: common.fStamp()
+    });
+    //保存站点信息
+    common.cache('v5_' + sid, cache);
     this.setData({
       info:common.assign(this.data.info, {
         robotName: robot.name,
@@ -175,8 +178,9 @@ Page({
    * 账号认证
    */
   getAccountAuth:function(){
-    console.log('[getAccountAuth]');//////
     var that = this;
+    toolTip.showToolTip('warn', '正在连接...');
+    wx.showNavigationBarLoading();
     wx.request({
       url: v5config.url.auth, //仅为示例，并非真实的接口地址
       method: 'POST',
@@ -192,7 +196,7 @@ Page({
           && !res.data.o_error) {
           console.log({'getAccountAuth ->success': res.data});
           v5config.auth = res.data.authorization;
-          res.data.websocket && (v5config.url.ws = res.data.websocket);
+          res.data.websocket && !res.data.websocket.indexOf('/') && (v5config.url.ws = 'wss://chat.v5kf.com' + res.data.websocket);
           //认证成功后连接socket
           that.connectSocket();
         } else if (res.statusCode === 200 || res.statusCode === '200') {
@@ -203,6 +207,21 @@ Page({
           wx.hideNavigationBarLoading();
           console.warn('getAccountAuth error:', res.errMsg);
           toolTip.showToolTip('error', 'webauth(' + res.statusCode + '): ' + res.errMsg);
+          wx.showModal({
+            title: '提示',
+            content: '连接失败，是否重试？',
+            success: function(res) {
+              if (res.confirm) {
+                that.getAccountAuth();
+              } else {
+                //wx.navigateBack();
+              }
+            },
+            fail: function(res) {
+              console.log(res.errMsg);
+              //wx.navigateBack();
+            }
+          });
         }
       }
     });
@@ -215,6 +234,8 @@ Page({
       toolTip.showToolTip('error', '未授权或授权未成功');
       return;
     }
+    toolTip.showToolTip('warn', '正在连接...');
+    wx.showNavigationBarLoading();
     var auth = encodeURIComponent(v5config.auth);
     wx.connectSocket({
       url: v5config.url.ws+'?auth='+auth,
@@ -229,8 +250,19 @@ Page({
       //连接成功请求消息和状态
       this.sendSocketMsg(MM.getStatus());
       this.sendSocketMsg(MM.getMessages(0, 30));
+      //转人工配置
+      v5config.human && this.tapSwitchHuman();
+      //重发发送失败缓存消息
+      if (socketMsgQueue.length) {
+        for (var m in socketMsgQueue) {
+          this.sendSocketMsg(socketMsgQueue[m]);
+        }
+        socketMsgQueue = [];
+      }
       wsInterval = setInterval(function() {
-        this.sendSocketMsg({o_type:'beat'});
+        socketOpen && wx.sendSocketMessage({
+          data: 'beat'
+        });
       }.bind(this), 25000);
     }.bind(this));
     wx.onSocketMessage(function(res) {
@@ -241,7 +273,7 @@ Page({
         var m = MM.fMsg(json);
         if (m) {
           switch(m.dir) {
-            case 8://相关问题问题
+            case 8://相关问题
               break;
             case 0:
             case 1:
@@ -265,10 +297,13 @@ Page({
                 this.addMessage(m);
               }
             }
-            if (!this.data.status && json.messages.length < 1 && v5config.robot.intro) {
-              var msg = MM.obtainTextMsg(v5config.robot.intro);
-              msg.direction = 2;
-              this.addMessage(MM.fMsg(msg));
+            // if (!this.data.status && json.messages.length < 1 && v5config.robot.intro) {
+            //   var msg = MM.obtainTextMsg(v5config.robot.intro);
+            //   msg.direction = 2;
+            //   this.addMessage(MM.fMsg(msg));
+            // }
+            if (json.messages.length < 1) {
+              this.loadHist();
             }
             this.updateMessageList();
           }
@@ -302,11 +337,29 @@ Page({
       }
     }.bind(this));
     wx.onSocketClose(function(res) {
+      console.warn('onSocketClose', res);
       socketOpen = false;
     }.bind(this));
     wx.onSocketError(function(res) {
+      console.warn('onSocketError', res);
       socketOpen = false;
+      var that = this;
       toolTip.showToolTip('error', '连接失败：' + res.toString());
+      /time out/.test(res.message) && wx.showModal({
+        title: '提示',
+        content: '连接失败，是否重试？',
+        success: function(res) {
+          if (res.confirm) {
+            that.connectSocket();
+          } else {
+            //wx.navigateBack();
+          }
+        },
+        fail: function(res) {
+          console.log(res.errMsg);
+          //wx.navigateBack();
+        }
+      });
       setTimeout(function(){
         wx.hideNavigationBarLoading();
       }, 200);
@@ -342,15 +395,17 @@ Page({
    * 页面加载
    */
   onLoad: function(options) {
+    console.log('onLoad', {ht:ht, htNeed:htNeed, lastTime:lastTime});
     toolTip.init(this); //初始化toolTip
     toolTip.showToolTip('warn', '正在连接...');
     // options: oid nickname human magic site
     if (options && options.site) {
+      var cache = common.cache('v5_' + options.site);
       v5config.human = options.human;
       v5config.magic = options.magic && JSON.parse(options.magic);
       v5config.site = common.assign(v5config.site, {  
           id: options.site,
-          aid: common.cache('v5_' + options.site + '_aid')
+          aid: cache && cache.aid
         });
       v5config.guest = common.assign(v5config.guest, {
         oid: this.getOid(options),
@@ -387,14 +442,37 @@ Page({
     // 页面隐藏
   },
   onUnload: function() {
-    // 页面关闭
+    //页面关闭，关闭socket
     wx.closeSocket();
+    //清除定时beat
     if (wsInterval) {
       clearInterval(wsInterval);
     }
+    //缓存消息
+    if (this.data.messages.length) {
+      var stamp = common.fStamp(), oid = v5config.guest.oid, sid = v5config.site.id;
+      var htCache = common.cache('v5_hist_' + sid) || {};
+      //存储当前对话消息
+      htCache[oid + '_' + stamp] = this.data.messages || [];
+      //存储历史消息索引
+      var htidx = htCache['ids_' + oid] || [];
+      htidx.push(stamp);
+      htCache['ids_' + oid] = htidx;
+      common.cache('v5_hist_' + sid, htCache);
+    }
+    //清空全局变量
+    lastTime = 0;
+    finishFlag = false;
+    offset = 0;
+    wsInterval = 0;
+    htNeed = 5; 
+    ht = null; 
+    loading = false;
+    nomore = false;
+    showNomore = false;
   },
   bindContentTap: function(e) {
-    // 滚动隐藏addFunc
+    //滚动隐藏addFunc
     if (this.data.showFunc) {
       //长度换算与实际表现有较大误差！
       var scrollHeight;
@@ -408,14 +486,92 @@ Page({
     }
   },
   /**
-   * 上拉刷新
+   * 滚动到顶部刷新
    */
   bindscrolltoupper: function() {
+    console.log('bindscrolltoupper 滚动到顶部');
     if (!finishFlag) {
       this.sendSocketMsg(MM.getMessages(offset, 30));
     } else {
       //历史消息
-      
+      this.loadHist();
+    }
+  },
+  /**
+   * 下拉刷新
+   */
+  onPullDownRefresh: function(){
+    console.log('onPullDownRefresh 下拉');
+    if (!finishFlag) {
+      this.sendSocketMsg(MM.getMessages(offset, 30));
+    } else {
+      //历史消息
+      this.loadHist();
+    }
+    wx.stopPullDownRefresh();
+  },
+  /**
+   * 加载历史消息:htNeed-需要数量，ht-消息索引
+   */
+  loadHist: function() {
+    console.log('loadHist', {nomore:nomore, showNomore:showNomore,htNeed:htNeed, ht:ht, hists:this.data.hists.length, messages:this.data.messages.length});
+    if (nomore && showNomore) {
+      return;
+    }
+    loading = true;
+    wx.showNavigationBarLoading();
+    if (ht && !ht.length) {
+      console.log('loadHist 没有历史消息');
+      toolTip.showToolTip('info', '没有更多', 2000);
+      loading = false;
+      wx.hideNavigationBarLoading();
+      nomore = true;
+      showNomore = true;
+      return;
+    }
+    if (this.data.hists.length >= (htNeed || 0)) {
+      loading = false;
+      htNeed = (htNeed || 0) + 5;
+      wx.hideNavigationBarLoading();
+      return;
+    }
+    var oid = v5config.guest.oid, sid = v5config.site.id;
+    var htCache = common.cache('v5_hist_' + sid) || {};
+    console.log('loadHist', {htCache:htCache});
+    if (!ht) {
+      ht = htCache['ids_' + oid] || [];
+    }
+    var hid = ht.pop(), msgs;
+    if (hid) {
+      msgs = htCache[oid + '_' + hid] || null;
+      console.log('loadHist', {hid:hid, msgs:msgs});
+      if (msgs) {
+        this.setData({
+          hists: msgs.concat(this.data.hists || [])
+        });
+        htNeed = this.data.hists.length + msgs.length;
+        //本次加载完成
+        loading = false;
+        htNeed = (htNeed || 0) + 5;
+        wx.hideNavigationBarLoading();
+      } else { //没有消息继续加载
+        if (nomore) {
+          loading = false;
+          wx.hideNavigationBarLoading();
+        } else {
+          this.loadHist();
+        }
+      }
+    } else {
+      loading = false;
+      wx.hideNavigationBarLoading();
+      nomore = true;
+    }
+    nomore && htNeed > this.data.hists.length && (htNeed = this.data.hists.length);
+    if (nomore && this.data.hists.length === 0 && this.data.messages.length === 0) {//empty msgs so use robot intro
+      var msg = MM.obtainTextMsg(v5config.robot.intro);
+      msg.direction = 2;
+      this.addMessage(MM.fMsg(msg));
     }
   },
   addMessage: function(m) {
@@ -521,11 +677,14 @@ Page({
               filePath: tempFile,
               name: 'file',
               header: {
-                'Authorization':v5config.auth
+                'Authorization':v5config.auth,
+                'Origin': 'https://chat.v5kf.com',
+                'Referer': 'https://chat.v5kf.com'
               },
               success: function(res){
                 var data = res.data;
                 data = JSON.parse(data);
+                console.log('tapImageUpload', res);//////
                 //do something
                 if (data && data.url) {
                   var msg = MM.obtainImageMsg(data.url);
@@ -557,7 +716,8 @@ Page({
     var that = this;
     //这里看你在wxml中绑定的数据格式 单独取出自己绑定即可
     var wh = common.wxAutoImageCal(e);
-    common.assign(this.data.messages[e.target.id].json, wh);
+    var msg = this.data.messages[e.target.id] || this.data.hists[e.target.id];
+    msg && common.assign(msg.json, wh);
     this.setData({messages: this.data.messages});
   }
 })

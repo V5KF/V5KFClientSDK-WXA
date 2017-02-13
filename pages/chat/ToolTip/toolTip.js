@@ -2,6 +2,8 @@
 var __this;
 function init(context) {
     __this = context;
+    __this.showToolTip = showToolTip;
+    __this.closeToolTip = closeToolTip;
 }
 
 function iconColorForType(type) {

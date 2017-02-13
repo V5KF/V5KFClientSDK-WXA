@@ -4,6 +4,7 @@
     "pages/chat/chat"
   ],
   "window":{
+    "enablePullDownRefresh": true,
     "backgroundTextStyle":"light",
     "navigationBarBackgroundColor": "#1866D1",
     "navigationBarTitleText": "WeChat",

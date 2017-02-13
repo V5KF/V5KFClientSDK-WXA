@@ -9,7 +9,7 @@ Page({
   },
   startChat: function() {
     wx.navigateTo({
-      url: '../chat/chat?site=105723&oid=abcdefghijklmnopqrstuvwxyz&nickname='+this.data.userInfo.nickname+'&photo='+this.data.userInfo.avatarUrl+'&human=false&magic=[{"key":"会员等级","val":"VIP3"}]'
+      url: '../chat/chat?site=105723&oid=abcdefghijklmnopqrstuvwxyz&nickname='+this.data.userInfo.nickName+'&photo='+this.data.userInfo.avatarUrl+'&human=false&magic=[{"key":"会员等级","val":"VIP3"}]'
     });
   },
   onLoad: function () {

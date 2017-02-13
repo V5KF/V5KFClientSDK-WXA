@@ -27,7 +27,7 @@ function cache(name, value, rm) { // name: obj|arr|string, value: string|obj, rm
     } else {
         throw new Error('无法处理的缓存名类型：' + name);
     }
-};
+}
 function ioCache(name, value) {
     return Object.prototype.toString.call(value) !== '[object Undefined]' ? (wx.setStorageSync(name, value), value) : wx.getStorageSync(name);
 }
@@ -38,7 +38,6 @@ function rmCache(name) {
         // Do something when catch error
     }
 }
-
 /**
  * 数字格式化
  *
@@ -262,6 +261,26 @@ function httpsURL(url) {
     return url.replace(/http:\/\//g, 'https://');
 }
 
+function clearCacheOfSite(sid) {
+    wx.clearStorageSync('v5_' + sid);
+    wx.clearStorageSync('v5_hist_' + sid);
+}
+
+function clearHistOfSite(sid) {
+    wx.clearStorageSync('v5_hist_' + sid);
+}
+
+module.exports = {
+    cache: cache,
+    fTime: fTime,
+    assign: assign,
+    fType: fType,
+    fStamp: fStamp,
+    wxAutoImageCal: wxAutoImageCal,
+    httpsURL: httpsURL,
+    clearCacheOfSite: clearCacheOfSite,
+    clearHistOfSite: clearHistOfSite
+}
 module.exports.cache = cache;
 module.exports.fTime = fTime;
 module.exports.assign = assign;
