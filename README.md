@@ -17,7 +17,6 @@ request合法域名:        https://chat.v5kf.com
 socket合法域名:         wss://chat.v5kf.com
 uploadFile合法域名:     https://chat.v5kf.com
 downloadFile合法域名:   https://chat.v5kf.com
-
 ```
 
 - 在需要联系客服时开启客服页面配置对应url参数：
