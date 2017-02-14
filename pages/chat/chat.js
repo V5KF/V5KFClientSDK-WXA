@@ -15,8 +15,8 @@ var v5config = {
       magic: [],
       env: [],
       url: {
-        ques: 'https://www.v5kf.com/public/api_dkf/get_hot_ques',
-        site: 'https://www.v5kf.com/public/api_dkf/get_chat_siteinfo',
+        ques: 'https://chat.v5kf.com/public/api_dkf/get_hot_ques',
+        site: 'https://chat.v5kf.com/public/api_dkf/get_chat_siteinfo',
         auth: 'https://chat.v5kf.com/public/webauth/v9',
         upload: 'https://chat.v5kf.com/public/upload',
         ws: 'wss://chat.v5kf.com/public/sitews'
