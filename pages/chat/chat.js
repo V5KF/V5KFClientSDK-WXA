@@ -291,8 +291,8 @@ Page({
           json.finish && (finishFlag = true);
           offset = json.offset + json.size;
           if (json.messages) {
-            for (var msg in json.messages) {
-              var m = MM.fMsg(msg);
+            for (var id in json.messages) {
+              var m = MM.fMsg(json.messages[id]);
               if (m) {
                 this.addMessage(m);
               }
@@ -403,6 +403,10 @@ Page({
       var cache = common.cache('v5_' + options.site);
       v5config.human = options.human;
       v5config.magic = options.magic && JSON.parse(options.magic);
+      if (!v5config.magic) {
+        v5config.magic = [];
+      }
+      v5config.magic.push({key:"客户渠道",val:"微信小程序"});
       v5config.site = common.assign(v5config.site, {  
           id: options.site,
           aid: cache && cache.aid
