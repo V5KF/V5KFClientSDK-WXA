@@ -62,12 +62,12 @@
             >
         </map>
     </block>-->
-    <block wx:elif="{{type === 6}}">
+    <!--<block wx:elif="{{type === 6}}">
         
     </block>
     <block wx:elif="{{type === 7 || type === 8}}">
         
-    </block>
+    </block>-->
     <block wx:else>
         <text>{{'暂不支持该消息类型(' + type + ')'}}</text>
     </block>

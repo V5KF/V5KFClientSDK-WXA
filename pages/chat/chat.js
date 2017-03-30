@@ -168,9 +168,9 @@ Page({
     this.setData({
       info:common.assign(this.data.info, {
         robotName: robot.name,
-        robotPhoto: common.httpsURL(robot.logo),
+        robotPhoto: common.httpsURL(robot.logo) || './img/robot.png',
         cstmName: v5config.guest.nickname,
-        cstmPhoto: common.httpsURL(v5config.guest.photo)
+        cstmPhoto: common.httpsURL(v5config.guest.photo) || './img/cstm.png'
       })
     });
   },
@@ -325,7 +325,7 @@ Page({
               v5config.worker.name = json.nickname;
               v5config.worker.photo = json.photo;
               this.setData({
-                info: common.assign(this.data.info, {workerPhoto:json.photo, workerName:json.nickname, wid:json.w_id})
+                info: common.assign(this.data.info, {workerPhoto:json.photo || './img/v5kf.png', workerName:json.nickname, wid:json.w_id})
               });
               toolTip.showToolTip('info', '客服'+json.nickname+'为您服务', 5000);
               break;

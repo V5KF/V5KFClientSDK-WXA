@@ -258,7 +258,7 @@ function wxAutoImageCal(e, win){
 }
 
 function httpsURL(url) {
-    return url.replace(/http:\/\//g, 'https://');
+    return url && url.replace(/http:\/\//g, 'https://');
 }
 
 function clearCacheOfSite(sid) {

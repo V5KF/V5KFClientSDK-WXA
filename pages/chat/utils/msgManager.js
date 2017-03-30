@@ -264,7 +264,7 @@ function fMsg(json) {
                 var text = json.content || json.text_content;
                 console.log('TEXT', text);//////
                 ret.json = {
-                    emojiArray: transEmojiStr(text),
+                    emojiArray: text && transEmojiStr(text),
                     text: text
                 }
                 break;
