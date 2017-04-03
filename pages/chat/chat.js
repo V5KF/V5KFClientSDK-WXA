@@ -8,6 +8,7 @@ var lastTime = 0; //记录消息时间间隔
 var finishFlag = false, offset = 0, wsInterval;
 //历史消息显示显示,历史消息索引数组
 var htNeed = 5, ht, loading = false, nomore = false, showNomore = false;
+var defaultTitle = '在线咨询';
 var v5config = {
       auth: null,
       fake: false,
@@ -179,7 +180,13 @@ Page({
    */
   getAccountAuth:function(){
     var that = this;
-    toolTip.showToolTip('warn', '正在连接...');
+    wx.setNavigationBarTitle({
+      title: '正在连接...',
+      success: function(res) {
+        // success
+      }
+    });
+    // toolTip.showToolTip('warn', '正在连接...');
     wx.showNavigationBarLoading();
     wx.request({
       url: v5config.url.auth, //仅为示例，并非真实的接口地址
@@ -198,7 +205,9 @@ Page({
           v5config.auth = res.data.authorization;
           res.data.websocket && !res.data.websocket.indexOf('/') && (v5config.url.ws = 'wss://chat.v5kf.com' + res.data.websocket);
           //认证成功后连接socket
-          that.connectSocket();
+          setTimeout(() => {
+            that.connectSocket();
+          }, 10);
         } else if (res.statusCode === 200 || res.statusCode === '200') {
           wx.hideNavigationBarLoading();
           console.warn('getAccountAuth error:', res.data.o_errmsg);
@@ -234,7 +243,8 @@ Page({
       toolTip.showToolTip('error', '未授权或授权未成功');
       return;
     }
-    toolTip.showToolTip('warn', '正在连接...');
+    console.log('connectSocket ');//////
+    // toolTip.showToolTip('warn', '正在连接...');
     wx.showNavigationBarLoading();
     var auth = encodeURIComponent(v5config.auth);
     wx.connectSocket({
@@ -243,6 +253,12 @@ Page({
     wx.onSocketOpen(function(res) {
       // callback
       socketOpen = true;
+      wx.setNavigationBarTitle({
+        title: defaultTitle,
+        success: function(res) {
+          // success
+        }
+      });
       toolTip.showToolTip('success', '连接成功', 2000);
       setTimeout(function(){
         wx.hideNavigationBarLoading();
@@ -250,8 +266,9 @@ Page({
       //连接成功请求消息和状态
       this.sendSocketMsg(MM.getStatus());
       this.sendSocketMsg(MM.getMessages(0, 30));
+      console.log('v5config:', v5config);//////
       //转人工配置
-      v5config.human && this.tapSwitchHuman();
+      v5config.human && (v5config.human == 'true' || v5config.human == 1) && this.tapSwitchHuman();
       //重发发送失败缓存消息
       if (socketMsgQueue.length) {
         for (var m in socketMsgQueue) {
@@ -345,12 +362,21 @@ Page({
       socketOpen = false;
       var that = this;
       toolTip.showToolTip('error', '连接失败：' + res.toString());
+      wx.setNavigationBarTitle({
+        title: '连接失败，请返回后重试',
+        success: function(res) {
+          // success
+        }
+      });
       /time out/.test(res.message) && wx.showModal({
         title: '提示',
         content: '连接失败，是否重试？',
         success: function(res) {
           if (res.confirm) {
-            that.connectSocket();
+            wx.closeSocket();
+            setTimeout(() => {
+              that.connectSocket();
+            }, 500);
           } else {
             //wx.navigateBack();
           }
@@ -377,7 +403,7 @@ Page({
               that.addMessage(m);
               that.updateMessageList();
             }
-            toolTip.showToolTip('success', '发送成功', 2000);
+            // toolTip.showToolTip('success', '发送成功', 2000);
           }
         },
         fail: function(res) {
@@ -396,8 +422,14 @@ Page({
    */
   onLoad: function(options) {
     console.log('onLoad', {ht:ht, htNeed:htNeed, lastTime:lastTime});
+    wx.setNavigationBarTitle({
+      title: '正在连接...',
+      success: function(res) {
+        // success
+      }
+    });
     toolTip.init(this); //初始化toolTip
-    toolTip.showToolTip('warn', '正在连接...');
+    // toolTip.showToolTip('warn', '正在连接...');
     // options: oid nickname human magic site
     if (options && options.site) {
       var cache = common.cache('v5_' + options.site);
