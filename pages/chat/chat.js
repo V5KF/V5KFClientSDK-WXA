@@ -276,6 +276,10 @@ Page({
         }
         socketMsgQueue = [];
       }
+      if (v5config.magic && v5config.magic.length > 0) {
+        this.sendMagicInfo(v5config.magic);
+        v5config.magic = [];
+      }
       wsInterval = setInterval(function() {
         socketOpen && wx.sendSocketMessage({
           data: 'beat'
@@ -478,6 +482,7 @@ Page({
     // 页面隐藏
   },
   onUnload: function() {
+    console.log('onUnload closeSocket');//////
     //页面关闭，关闭socket
     wx.closeSocket();
     //清除定时beat
@@ -663,8 +668,9 @@ Page({
       e.detail.value.trim()) {
       if (this.checkSocketOpen()) {
         var msg = MM.obtainTextMsg(e.detail.value.trim());
-        if (v5config.magic) {
+        if (v5config.magic && v5config.magic.length > 0) {
           msg.custom_content = v5config.magic;
+          v5config.magic = [];
         }
         this.sendSocketMsg(msg);
         this.setData({
@@ -735,6 +741,16 @@ Page({
             toolTip.showToolTip('warn', '您还没有选择图片', 2000);
           }
         }
+      });
+    }
+  },
+  sendMagicInfo: function(magic) {
+    if (this.checkSocketOpen()) { //转人工
+      this.sendSocketMsg({
+        o_type: 'message',
+        code: 2, // 发送消息
+        message_type: 26,
+        mjson: magic
       });
     }
   },
