@@ -50,6 +50,7 @@
         <image
             id="{{index}}"
             bindload="msgImageLoad"
+            bindtap="imagePreview"
             style="width:{{json.imgW}}px;height:{{json.imgH}}px"
             src="{{json.src}}"/>
     </block>

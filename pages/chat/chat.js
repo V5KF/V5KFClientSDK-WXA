@@ -108,7 +108,7 @@ Page({
     }
     var oid = conf.oid, sid = conf.site,
     cache = common.cache('v5_' + sid) || {};
-    if (!oid) {
+    if (!oid || oid === 'null' || oid === 'undefined') {
       oid = cache && cache.oid;
     } else {
       cache.oid = oid || '';
@@ -132,7 +132,6 @@ Page({
         sid: v5config.site.id
       },
       complete: function(res) {
-        console.info({'getSiteInfo ->complete': res});//////
         if ((res.statusCode === 200 || res.statusCode === '200') 
           && res.data.state === 'ok') {
           console.log({'getSiteInfo ->success': res});
@@ -195,10 +194,10 @@ Page({
         site: v5config.site.id,
         account: v5config.site.aid || v5config.site.account_id,
         visitor: v5config.guest.oid,
-        nickname: v5config.guest.nickname || ''
+        nickname: v5config.guest.nickname || '',
+        avatar: v5config.guest.photo
       },
       complete: function(res) {
-        console.info({'getAccountAuth ->complete': res});//////
         if ((res.statusCode === 200 || res.statusCode === '200') 
           && !res.data.o_error) {
           console.log({'getAccountAuth ->success': res.data});
@@ -425,7 +424,7 @@ Page({
    * 页面加载
    */
   onLoad: function(options) {
-    console.log('onLoad', {ht:ht, htNeed:htNeed, lastTime:lastTime});
+    // console.log('onLoad', {ht:ht, htNeed:htNeed, lastTime:lastTime, options:options});
     wx.setNavigationBarTitle({
       title: '正在连接...',
       success: function(res) {
@@ -771,5 +770,25 @@ Page({
     var msg = this.data.messages[e.target.id] || this.data.hists[e.target.id];
     msg && common.assign(msg.json, wh);
     this.setData({messages: this.data.messages});
+  },
+  imagePreview: function(e) {
+    var msg = this.data.messages[e.target.id] || this.data.hists[e.target.id];
+    if (msg && msg.type == MM.msgTypes.IMAGE) {
+      var url = msg.json.src;
+      wx.previewImage({
+        current: url,
+        urls: [url],
+        success: function(res) {
+          console.log('imagePreview', res);
+        },
+        //也根本不走
+        fail: function() {
+          console.log('imagePreview fail')
+        },
+        complete:function(){
+          console.log('imagePreview complete')
+        }
+      })
+    }
   }
 })
