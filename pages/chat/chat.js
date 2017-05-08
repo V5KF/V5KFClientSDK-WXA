@@ -749,7 +749,7 @@ Page({
         o_type: 'message',
         code: 2, // 发送消息
         message_type: 26,
-        mjson: magic
+        mjson: {magic_arr:magic}
       });
     }
   },

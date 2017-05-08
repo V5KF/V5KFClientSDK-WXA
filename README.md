@@ -1,5 +1,9 @@
 # V5智能客服——客户端小程序接入
 
+## 注意
+
+小程序客服接入建议采用小程序官方客服接口，登录V5后台 “系统接入” -> “微信小程序” 按照填写说明进行接入配置，同时在微信公众平台小程序后台进行消息服务器配置（[接入指引](https://mp.weixin.qq.com/debug/wxadoc/dev/api/custommsg/callback_help.html)），然后在你的小程序中添加[客服会话按钮](https://mp.weixin.qq.com/debug/wxadoc/dev/component/contact-button.html)即可。
+
 ## 接入配置
 - 拷贝整个chat文件夹到您的项目pages/下
 - 配置app.json，添加chat页面：
