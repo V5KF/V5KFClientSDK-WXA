@@ -4,10 +4,17 @@
     <image class="userinfo-avatar" src="{{userInfo.avatarUrl}}" background-size="cover"></image>
     <text class="userinfo-nickname">{{userInfo.nickName}}</text>
   </view>
-  <view class="usermotto">
+  <view class="usermotto hide">
     <text class="user-motto">{{motto}}</text>
   </view>
-  <view class="startchat" hidden="{{false}}">
-    <button type="primary" bindtap="startChat">Chat</button>
+  <view class="tips">
+  请点击下方按钮开启对话体验小程序客服
   </view>
+  <contact-button 
+    class="contact-btn"
+    type="default-light" 
+    size="25"
+    session-from="weapp"
+  >
+  </contact-button>
 </view>

@@ -22,5 +22,27 @@
 }
 
 .startchat {
-  margin-top: 8rpx
+  margin-top: 16rpx;
+}
+
+.contact-btn {
+  position: absolute;
+  /*right: 1rem;
+  bottom: 1rem;*/
+  margin: 0 auto;
+  top: 50%;
+  background-color: #1881d3;
+  padding: 15rpx;
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 50rpx;
+}
+
+.hide {
+  display: none;
+}
+
+.tips {
+  margin-top: 28rpx;
+  color: #acacac;
 }
