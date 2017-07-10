@@ -6,7 +6,7 @@
 
  - 登录V5后台 “系统接入” -> “微信小程序” 按照填写说明进行接入配置，同时在微信公众平台小程序后台进行消息服务器配置（[接入指引](https://mp.weixin.qq.com/debug/wxadoc/dev/api/custommsg/callback_help.html)）
  - 在你的小程序中添加[客服会话按钮](https://mp.weixin.qq.com/debug/wxadoc/dev/component/contact-button.html)
- - 客服会话按钮的使用可以下载[客服会话按钮使用demo](./V5KFClientSDK-WXA-1.0.0_170516.zip)作为参考。
+ - 客服会话按钮的使用可以下载[客服会话按钮使用demo](https://github.com/V5KF/V5KFClientSDK-WXA/archive/master.zip)作为参考。
 
 ## ~~接入配置~~
 - ~~拷贝整个chat文件夹到您的项目pages/下~~
