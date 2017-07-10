@@ -8,7 +8,12 @@
  - 在你的小程序中添加[客服会话按钮](https://mp.weixin.qq.com/debug/wxadoc/dev/component/contact-button.html)
  - 客服会话按钮的使用可以下载[客服会话按钮使用demo](https://github.com/V5KF/V5KFClientSDK-WXA/archive/master.zip)作为参考。
 
-## ~~接入配置~~
+目前小程序客服接口支持：
+
+- 机器人自动回复，输入转人工接入人工（可培训）
+- 支持发送文本和图片消息
+
+## ~~接入配置~~(不再建议使用)
 - ~~拷贝整个chat文件夹到您的项目pages/下~~
 - ~~配置app.json，添加chat页面：~~
 
