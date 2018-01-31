@@ -26,7 +26,7 @@
     <view class="v5_pnl_input">
         <input id="text" 
             value="{{input.value}}"
-            placeholder="在此输入..."
+            placeholder="在此输入，回车键发送"
             cursor-spacing="10"
             bindinput="bindinput"
             bindfocus="bindfocus"

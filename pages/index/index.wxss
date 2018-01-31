@@ -44,5 +44,6 @@
 
 .tips {
   margin-top: 28rpx;
+  margin-bottom: 18rpx;
   color: #acacac;
 }

@@ -10,6 +10,7 @@
   <view class="tips">
   请点击下方按钮开启对话体验小程序客服
   </view>
+  <button type="primary" bindtap="startChat">Chat</button>
   <contact-button 
     class="contact-btn"
     type="default-light" 

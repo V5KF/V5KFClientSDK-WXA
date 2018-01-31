@@ -9,7 +9,7 @@ Page({
   },
   startChat: function() {
     wx.navigateTo({
-      url: '../chat/chat?site=10000&nickname='+this.data.userInfo.nickName+'&photo='+this.data.userInfo.avatarUrl+'&human=false&magic=[{"key":"来源","val":"小程序"}]'
+      url: '../chat/chat?site=105723&nickname='+this.data.userInfo.nickName+'&photo='+this.data.userInfo.avatarUrl+'&human=false&magic=[{"key":"来源","val":"小程序"}]'
     });
   },
   onLoad: function () {
